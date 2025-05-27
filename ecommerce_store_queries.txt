@@ -1,11 +1,3 @@
--- ecommerce_store_queries.sql
-     -- This file contains SQL queries for data insertion, retrieval, updates, and deletions
-     -- for the ecommerce_store database. Queries are grouped by operation type.
-
-     -- ##########################################################
-     -- # Insertion Queries
-     -- # These queries add new records to the database tables.
-     -- ##########################################################
 
      -- Insert a New Product Category
      INSERT INTO product_category (category_name) VALUES ('Electronics');
@@ -51,11 +43,7 @@
      INSERT INTO order_line (order_id, product_item_id, qty, price) VALUES (1, 1, 1, 699.99);
      INSERT INTO order_line (order_id, product_item_id, qty, price) VALUES (1, 2, 1, 15.99);
 
-     -- ##########################################################
-     -- # Retrieval Queries
-     -- # These queries fetch data from the database tables.
-     -- ##########################################################
-
+   
      -- Retrieve All Products with Items
      SELECT p.id, p.name, p.description, p.image, pi.id AS item_id, pi.price, pi.SKU, pi.qty_in_stock 
      FROM product p 
@@ -94,11 +82,7 @@
      JOIN product p ON pi.product_id = p.id 
      WHERE ol.order_id = 1;
 
-     -- ##########################################################
-     -- # Update Queries
-     -- # These queries modify existing records in the database tables.
-     -- ##########################################################
-
+   
      -- Update Product Details
      UPDATE product 
      SET name = 'Smartphone Pro', description = 'Upgraded smartphone model', image = 'https://via.placeholder.com/200', category_id = 1 
@@ -124,11 +108,7 @@
      SET order_status_id = 2 
      WHERE id = 1;
 
-     -- ##########################################################
-     -- # Deletion Queries
-     -- # These queries remove records from the database tables.
-     -- # Note: Due to RESTRICT behavior, deletions may fail if child records exist.
-     -- ##########################################################
+   
 
      -- Delete a Product Category
      DELETE FROM product_category WHERE id = 3;
@@ -151,9 +131,4 @@
      -- Delete a User
      DELETE FROM site_user WHERE id = 2;
 
-     -- ##########################################################
-     -- # Additional Notes
-     -- # - Execute these queries in the order: Insertions, Retrievals, Updates, Deletions.
-     -- # - Foreign key constraints use RESTRICT by default, so delete child records first if needed.
-     -- # - Example: To delete a product category, first update or delete related products.
-     -- ##########################################################
+    
