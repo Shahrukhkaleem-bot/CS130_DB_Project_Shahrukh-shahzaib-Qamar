@@ -17,8 +17,8 @@ try {
 $message = '';
 
 try {
-    // Fetch all products with their items, including the image, using LEFT JOIN
-    $stmt = $pdo->prepare("SELECT p.id, p.name, p.description, p.image, pi.id AS item_id, pi.price, pi.SKU, pi.qty_in_stock 
+    // Fetch all products with their items, including the image and price
+    $stmt = $pdo->prepare("SELECT p.id, p.name, p.description, p.image, p.price AS product_price, pi.id AS item_id, pi.price AS item_price, pi.SKU, pi.qty_in_stock 
                            FROM product p 
                            LEFT JOIN product_item pi ON p.id = pi.product_id");
     $stmt->execute();
@@ -28,9 +28,11 @@ try {
         $message = "No products found in the database.";
     } else {
         foreach ($products as &$product) {
-            if ($product['price'] !== null) {
-                $product['original_price'] = $product['price'] * 1.1; // Simulate 10% higher original price
-                $product['discount'] = round((($product['original_price'] - $product['price']) / $product['original_price']) * 100);
+            // Use product price if available, otherwise fall back to item price or default to 0.00
+            $product['display_price'] = $product['product_price'] ?? $product['item_price'] ?? 0.00;
+            if ($product['display_price'] > 0) {
+                $product['original_price'] = $product['display_price'] * 1.1; // Simulate 10% higher original price
+                $product['discount'] = round((($product['original_price'] - $product['display_price']) / $product['original_price']) * 100);
             } else {
                 $product['original_price'] = null;
                 $product['discount'] = 0;
@@ -139,16 +141,16 @@ try {
                         <div>
                             <img src="<?php echo htmlspecialchars($product['image']); ?>" alt="<?php echo htmlspecialchars($product['name']); ?>" class="w-full h-48 object-cover rounded-t-lg">
                             <h3 class="text-sm font-medium text-gray-800 h-12 overflow-hidden mt-2"><?php echo htmlspecialchars($product['name']); ?></h3>
-                            <?php if ($product['price'] !== null): ?>
+                            <?php if ($product['display_price'] > 0): ?>
                                 <p class="text-xs text-gray-500 line-through">Rs. <?php echo number_format($product['original_price'], 2); ?></p>
-                                <p class="text-sm font-bold text-gray-800">Rs. <?php echo number_format($product['price'], 2); ?></p>
+                                <p class="text-sm font-bold text-gray-800">Rs. <?php echo number_format($product['display_price'], 2); ?></p>
                                 <p class="text-xs text-purple-600"><?php echo $product['discount']; ?>% OFF</p>
                             <?php else: ?>
                                 <p class="text-sm text-gray-600">Price not available</p>
                             <?php endif; ?>
                         </div>
-                        <?php if ($product['item_id'] !== null): ?>
-                            <button onclick="addToCart(<?php echo $product['item_id']; ?>, this)" class="bg-purple-600 text-white px-3 py-1 rounded text-sm mt-4 w-full hover:bg-purple-700 transition">Add to Cart</button>
+                        <?php if ($product['display_price'] > 0 && ($product['item_id'] !== null || $product['product_price'] > 0)): ?>
+                            <button onclick="addToCart(<?php echo $product['item_id'] ?? 0; ?>, <?php echo $product['id']; ?>, this)" class="bg-purple-600 text-white px-3 py-1 rounded text-sm mt-4 w-full hover:bg-purple-700 transition">Add to Cart</button>
                         <?php else: ?>
                             <p class="text-xs text-gray-500 mt-4">Not available for purchase</p>
                         <?php endif; ?>
@@ -169,7 +171,7 @@ try {
                 <h3 class="text-xl font-bold mb-4">Quick Links</h3>
                 <ul class="space-y-2">
                     <li><a href="products.php" class="text-gray-400 hover:text-white transition duration-300">Products</a></li>
-                    <li><a href="cart.php" class="text-gray-400 hover:text-white transition duration-300">Cart</a></li>
+                    <li><a href="cart.php" class="hover:text-gray-200">Cart</a></li>
                     <?php if (isset($_SESSION['user_id'])): ?>
                         <li><a href="profile.php" class="text-gray-400 hover:text-white transition duration-300">Profile</a></li>
                         <li><a href="logout.php" class="text-gray-400 hover:text-white transition duration-300">Logout</a></li>
@@ -198,17 +200,35 @@ try {
             navbar.classList.toggle('hidden');
         });
 
-        function addToCart(itemId, button) {
-            fetch('cart.php?action=add', {
+        function addToCart(itemId, productId, button) {
+            const data = {
+                action: 'add',
+                product_item_id: itemId,
+                product_id: productId,
+                qty: 1
+            };
+            const jsonString = JSON.stringify(data);
+            console.log('Fetching URL:', 'cart.php'); // Debug log
+            console.log('Sending JSON:', jsonString); // Debug log
+            fetch('cart.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ product_item_id: itemId, qty: 1 })
+                body: jsonString
             })
             .then(response => {
-                if (!response.ok) throw new Error('Network response was not ok');
-                return response.json();
+                console.log('Response status:', response.status); // Debug log
+                if (!response.ok) {
+                    return response.json().then(err => {
+                        throw new Error(err.error || 'Network response was not ok');
+                    });
+                }
+                return response.text().then(text => {
+                    console.log('Raw response:', text); // Debug raw response
+                    return JSON.parse(text);
+                });
             })
             .then(data => {
+                console.log('Response data:', data); // Debug log
                 button.classList.add('pulse');
                 const successMessage = document.createElement('div');
                 successMessage.className = 'text-green-600 text-center mt-2 text-xs fade-in';
@@ -220,8 +240,8 @@ try {
                 }, 2000);
             })
             .catch(error => {
-                console.error('Error:', error);
-                alert('Failed to add to cart. Please try again.');
+                console.error('Error:', error.message); // Debug log
+                alert(error.message || 'Failed to add to cart. Please try again.');
             });
         }
     </script>
