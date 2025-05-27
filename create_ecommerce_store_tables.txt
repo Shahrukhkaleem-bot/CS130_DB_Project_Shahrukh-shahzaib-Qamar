@@ -1,0 +1,78 @@
+-- Create tables with foreign keys for the ecommerce_store database
+
+     CREATE TABLE site_user (
+         id INT AUTO_INCREMENT PRIMARY KEY,
+         email_address VARCHAR(255),
+         password VARCHAR(255),
+         phone_number VARCHAR(20)
+     );
+
+     CREATE TABLE product_category (
+         id INT AUTO_INCREMENT PRIMARY KEY,
+         category_name VARCHAR(100)
+     );
+
+     CREATE TABLE product (
+         id INT AUTO_INCREMENT PRIMARY KEY,
+         name VARCHAR(100),
+         description TEXT,
+         image VARCHAR(255),
+         category_id INT,
+         FOREIGN KEY (category_id) REFERENCES product_category(id)
+     );
+
+     CREATE TABLE product_item (
+         id INT AUTO_INCREMENT PRIMARY KEY,
+         product_id INT,
+         SKU VARCHAR(50),
+         qty_in_stock INT,
+         price DECIMAL(10, 2),
+         FOREIGN KEY (product_id) REFERENCES product(id)
+     );
+
+     CREATE TABLE shopping_cart (
+         id INT AUTO_INCREMENT PRIMARY KEY,
+         user_id INT,
+         FOREIGN KEY (user_id) REFERENCES site_user(id)
+     );
+
+     CREATE TABLE shopping_cart_item (
+         id INT AUTO_INCREMENT PRIMARY KEY,
+         cart_id INT,
+         product_item_id INT,
+         qty INT,
+         FOREIGN KEY (cart_id) REFERENCES shopping_cart(id),
+         FOREIGN KEY (product_item_id) REFERENCES product_item(id)
+     );
+
+     CREATE TABLE shipping_method (
+         id INT AUTO_INCREMENT PRIMARY KEY,
+         name VARCHAR(100),
+         price DECIMAL(10, 2)
+     );
+
+     CREATE TABLE order_status (
+         id INT AUTO_INCREMENT PRIMARY KEY,
+         status VARCHAR(50)
+     );
+
+     CREATE TABLE shop_order (
+         id INT AUTO_INCREMENT PRIMARY KEY,
+         order_date DATETIME,
+         order_total DECIMAL(10, 2),
+         shipping_address TEXT,
+         shipping_method_id INT,
+         order_status_id INT,
+         FOREIGN KEY (shipping_method_id) REFERENCES shipping_method(id),
+         FOREIGN KEY (order_status_id) REFERENCES order_status(id)
+     );
+
+     CREATE TABLE order_line (
+         id INT AUTO_INCREMENT PRIMARY KEY,
+         order_id INT,
+         product_item_id INT,
+         qty INT,
+         price DECIMAL(10, 2),
+         FOREIGN KEY (order_id) REFERENCES shop_order(id),
+         FOREIGN KEY (product_item_id) REFERENCES product_item(id)
+     );

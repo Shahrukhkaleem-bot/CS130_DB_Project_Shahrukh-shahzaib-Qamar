@@ -1,0 +1,21 @@
+-- Populate the ecommerce_store database with sample data
+
+     -- Insert product categories
+     INSERT INTO product_category (id, category_name) VALUES
+     (1, 'Electronics'),
+     (2, 'Food'),
+     (3, 'Books');
+
+     -- Insert products
+     INSERT INTO product (id, name, description, image, category_id) VALUES
+     (1, 'Smartphone', 'Latest model smartphone', 'https://via.placeholder.com/150', 1),
+     (2, 'Pizza', 'Delicious pizza pie', 'uploads/pizza.jpg', 2),
+     (3, 'Book', 'Bestseller novel', 'https://via.placeholder.com/150', 3),
+     (4, 'Laptop', 'High-performance laptop', 'uploads/laptop.jpg', 1);
+
+     -- Insert product items
+     INSERT INTO product_item (id, product_id, SKU, qty_in_stock, price) VALUES
+     (1, 1, 'SM001', 100, 699.99),
+     (2, 2, 'PZ001', 50, 15.99),
+     (3, 3, 'BK001', 200, 14.99),
+     (4, 4, 'LP001', 30, 1299.99);

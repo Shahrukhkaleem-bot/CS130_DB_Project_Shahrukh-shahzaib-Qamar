@@ -1,0 +1,159 @@
+-- ecommerce_store_queries.sql
+     -- This file contains SQL queries for data insertion, retrieval, updates, and deletions
+     -- for the ecommerce_store database. Queries are grouped by operation type.
+
+     -- ##########################################################
+     -- # Insertion Queries
+     -- # These queries add new records to the database tables.
+     -- ##########################################################
+
+     -- Insert a New Product Category
+     INSERT INTO product_category (category_name) VALUES ('Electronics');
+     INSERT INTO product_category (category_name) VALUES ('Food');
+     INSERT INTO product_category (category_name) VALUES ('Books');
+
+     -- Insert a New Product
+     INSERT INTO product (name, description, image, category_id) VALUES ('Smartphone', 'Latest model smartphone', 'https://via.placeholder.com/150', 1);
+     INSERT INTO product (name, description, image, category_id) VALUES ('Pizza', 'Delicious pizza pie', 'uploads/pizza.jpg', 2);
+     INSERT INTO product (name, description, image, category_id) VALUES ('Bestseller Novel', 'A thrilling novel', 'https://via.placeholder.com/150', 3);
+
+     -- Insert a New Product Item
+     INSERT INTO product_item (product_id, SKU, qty_in_stock, price) VALUES (1, 'SM001', 100, 699.99);
+     INSERT INTO product_item (product_id, SKU, qty_in_stock, price) VALUES (2, 'PZ001', 50, 15.99);
+     INSERT INTO product_item (product_id, SKU, qty_in_stock, price) VALUES (3, 'BK001', 200, 14.99);
+
+     -- Insert a New User
+     INSERT INTO site_user (email_address, password, phone_number) VALUES ('user@example.com', 'hashedpassword123', '1234567890');
+     INSERT INTO site_user (email_address, password, phone_number) VALUES ('admin@example.com', 'hashedadmin456', '0987654321');
+
+     -- Insert a New Shopping Cart
+     INSERT INTO shopping_cart (user_id) VALUES (1);
+     INSERT INTO shopping_cart (user_id) VALUES (2);
+
+     -- Insert a New Shopping Cart Item
+     INSERT INTO shopping_cart_item (cart_id, product_item_id, qty) VALUES (1, 1, 2);
+     INSERT INTO shopping_cart_item (cart_id, product_item_id, qty) VALUES (1, 2, 1);
+
+     -- Insert a New Shipping Method
+     INSERT INTO shipping_method (name, price) VALUES ('Standard Shipping', 5.99);
+     INSERT INTO shipping_method (name, price) VALUES ('Express Shipping', 15.99);
+
+     -- Insert a New Order Status
+     INSERT INTO order_status (status) VALUES ('Pending');
+     INSERT INTO order_status (status) VALUES ('Shipped');
+     INSERT INTO order_status (status) VALUES ('Delivered');
+
+     -- Insert a New Shop Order
+     INSERT INTO shop_order (order_date, order_total, shipping_address, shipping_method_id, order_status_id) 
+     VALUES ('2025-05-27 23:54:00', 715.98, '123 Main St, City', 1, 1);
+
+     -- Insert a New Order Line
+     INSERT INTO order_line (order_id, product_item_id, qty, price) VALUES (1, 1, 1, 699.99);
+     INSERT INTO order_line (order_id, product_item_id, qty, price) VALUES (1, 2, 1, 15.99);
+
+     -- ##########################################################
+     -- # Retrieval Queries
+     -- # These queries fetch data from the database tables.
+     -- ##########################################################
+
+     -- Retrieve All Products with Items
+     SELECT p.id, p.name, p.description, p.image, pi.id AS item_id, pi.price, pi.SKU, pi.qty_in_stock 
+     FROM product p 
+     LEFT JOIN product_item pi ON p.id = pi.product_id;
+
+     -- Retrieve Categories for Navigation
+     SELECT DISTINCT pc.category_name 
+     FROM product_category pc 
+     JOIN product p ON pc.id = p.category_id 
+     LIMIT 8;
+
+     -- Retrieve User by Email
+     SELECT id, email_address, password, phone_number 
+     FROM site_user 
+     WHERE email_address = 'user@example.com';
+
+     -- Retrieve Cart Items for a User
+     SELECT sci.id, sci.qty, pi.price, p.name, p.image 
+     FROM shopping_cart sc 
+     JOIN shopping_cart_item sci ON sc.id = sci.cart_id 
+     JOIN product_item pi ON sci.product_item_id = pi.id 
+     JOIN product p ON pi.product_id = p.id 
+     WHERE sc.user_id = 1;
+
+     -- Retrieve Order Details
+     SELECT so.id, so.order_date, so.order_total, so.shipping_address, sm.name AS shipping_method, os.status 
+     FROM shop_order so 
+     JOIN shipping_method sm ON so.shipping_method_id = sm.id 
+     JOIN order_status os ON so.order_status_id = os.id 
+     WHERE so.id = 1;
+
+     -- Retrieve Order Lines for an Order
+     SELECT ol.id, ol.qty, ol.price, p.name, p.image 
+     FROM order_line ol 
+     JOIN product_item pi ON ol.product_item_id = pi.id 
+     JOIN product p ON pi.product_id = p.id 
+     WHERE ol.order_id = 1;
+
+     -- ##########################################################
+     -- # Update Queries
+     -- # These queries modify existing records in the database tables.
+     -- ##########################################################
+
+     -- Update Product Details
+     UPDATE product 
+     SET name = 'Smartphone Pro', description = 'Upgraded smartphone model', image = 'https://via.placeholder.com/200', category_id = 1 
+     WHERE id = 1;
+
+     -- Update Product Item Stock and Price
+     UPDATE product_item 
+     SET qty_in_stock = 90, price = 749.99 
+     WHERE id = 1;
+
+     -- Update User Details
+     UPDATE site_user 
+     SET email_address = 'newuser@example.com', password = 'newhashedpassword789', phone_number = '9876543210' 
+     WHERE id = 1;
+
+     -- Update Cart Item Quantity
+     UPDATE shopping_cart_item 
+     SET qty = 3 
+     WHERE id = 1;
+
+     -- Update Order Status
+     UPDATE shop_order 
+     SET order_status_id = 2 
+     WHERE id = 1;
+
+     -- ##########################################################
+     -- # Deletion Queries
+     -- # These queries remove records from the database tables.
+     -- # Note: Due to RESTRICT behavior, deletions may fail if child records exist.
+     -- ##########################################################
+
+     -- Delete a Product Category
+     DELETE FROM product_category WHERE id = 3;
+
+     -- Delete a Product
+     DELETE FROM product WHERE id = 3;
+
+     -- Delete a Product Item
+     DELETE FROM product_item WHERE id = 3;
+
+     -- Delete a Cart Item
+     DELETE FROM shopping_cart_item WHERE id = 2;
+
+     -- Delete a Shopping Cart
+     DELETE FROM shopping_cart WHERE id = 2;
+
+     -- Delete an Order
+     DELETE FROM shop_order WHERE id = 1;
+
+     -- Delete a User
+     DELETE FROM site_user WHERE id = 2;
+
+     -- ##########################################################
+     -- # Additional Notes
+     -- # - Execute these queries in the order: Insertions, Retrievals, Updates, Deletions.
+     -- # - Foreign key constraints use RESTRICT by default, so delete child records first if needed.
+     -- # - Example: To delete a product category, first update or delete related products.
+     -- ##########################################################
