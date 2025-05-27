@@ -1,4 +1,4 @@
--- Populate the ecommerce_store database with sample data
+
 
      -- Insert product categories
      INSERT INTO product_category (id, category_name) VALUES
