@@ -18,6 +18,7 @@
          description TEXT,
          image VARCHAR(255),
          category_id INT,
+          price INT ,
          FOREIGN KEY (category_id) REFERENCES product_category(id)
      );
 
@@ -63,6 +64,7 @@
          shipping_address TEXT,
          shipping_method_id INT,
          order_status_id INT,
+         user_id, INT,
          FOREIGN KEY (shipping_method_id) REFERENCES shipping_method(id),
          FOREIGN KEY (order_status_id) REFERENCES order_status(id)
      );
