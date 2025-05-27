@@ -18,6 +18,7 @@ CREATE TABLE product (
     description TEXT,
     image VARCHAR(255),
     category_id INT,
+    price INT,
     FOREIGN KEY (category_id) REFERENCES product_category(id)
 );
 
@@ -59,6 +60,7 @@ CREATE TABLE order_status (
 CREATE TABLE shop_order (
     id INT AUTO_INCREMENT PRIMARY KEY,
     order_date DATETIME,
+    user_id INT,
     order_total DECIMAL(10, 2),
     shipping_address TEXT,
     shipping_method_id INT,
